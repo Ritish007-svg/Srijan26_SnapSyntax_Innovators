@@ -22,7 +22,7 @@ const Index = () => {
         {/* Navbar */}
         <nav className="relative z-10 flex items-center justify-between px-8 py-6">
           <div className="flex items-center gap-3">
-            <img src={hotelLogo} alt="Grand Hotel Logo" className="w-16 h-16 object-contain" width={512} height={512} />
+            <img src={hotelLogo} alt="Grand Hotel Logo" className="w-24 h-24 object-contain" width={512} height={512} />
             <span className="text-gold font-heading text-sm tracking-wider hidden sm:block">GRAND HOTEL</span>
           </div>
 
