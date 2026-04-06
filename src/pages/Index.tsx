@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin, User, CalendarDays } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import hotelLogo from "@/assets/hotel-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,10 +22,8 @@ const Index = () => {
         {/* Navbar */}
         <nav className="relative z-10 flex items-center justify-between px-8 py-6">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full border-2 border-gold flex items-center justify-center">
-              <span className="text-gold font-heading text-lg font-bold">GH</span>
-            </div>
-            <span className="text-foreground font-heading text-sm tracking-wider hidden sm:block">GRAND HOTEL</span>
+            <img src={hotelLogo} alt="Grand Hotel Logo" className="w-16 h-16 object-contain" width={512} height={512} />
+            <span className="text-gold font-heading text-sm tracking-wider hidden sm:block">GRAND HOTEL</span>
           </div>
 
           <div className="flex items-center gap-3">

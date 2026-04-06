@@ -29,15 +29,19 @@ const Hotels = () => {
   };
 
   return (
-    <div className="min-h-screen bg-purple-gradient py-12 px-8 lg:px-16">
+    <div className="min-h-screen bg-dark-gold-gradient py-12 px-8 lg:px-16 relative overflow-hidden">
+      {/* Decorative glow */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gold/8 rounded-full blur-3xl" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-12">
+      <div className="relative z-10 flex items-center justify-between mb-12">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate("/")} className="hover:scale-110 transition-transform">
             <Home className="w-8 h-8 text-foreground" />
           </button>
           <h2 className="font-heading italic text-gold text-3xl lg:text-4xl font-bold">
-            Explore Our Best List<br />5-Stars Hotel!
+            Explore Our Best List 5-Stars Hotel!
           </h2>
         </div>
         <button
@@ -50,11 +54,11 @@ const Hotels = () => {
       </div>
 
       {/* Hotels Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {hotels.map((hotel) => (
-          <div key={hotel.name} className="animate-fade-in">
-            <div className="rounded-2xl overflow-hidden">
-              <img src={hotel.image} alt={hotel.name} className="w-full h-[220px] object-cover" loading="lazy" width={800} height={600} />
+          <div key={hotel.name} className="animate-fade-in group">
+            <div className="rounded-2xl overflow-hidden shadow-lg shadow-gold/10 hover:shadow-gold/20 transition-shadow duration-500">
+              <img src={hotel.image} alt={hotel.name} className="w-full h-[220px] object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" width={800} height={600} />
             </div>
             <h3 className="font-heading text-gold text-lg font-bold mt-3">{hotel.name}</h3>
             <div className="flex items-center gap-2 mt-1">
