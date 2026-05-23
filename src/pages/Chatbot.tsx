@@ -458,8 +458,18 @@ function MessageBubble({
               {message.content}
             </div>
             <div className="text-[11px] text-muted-foreground mt-1">{message.time}</div>
+            {message.askResolution && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-[12px] text-muted-foreground">Did this resolve your doubt?</span>
+                <Chip text="Yes" onClick={() => onChip("Yes, that resolved it")} />
+                <Chip text="No" onClick={() => onChip("No, still not clear")} />
+              </div>
+            )}
             {message.chips && message.chips.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
+                {message.askResolution && (
+                  <span className="w-full text-[11px] text-muted-foreground -mb-1">Or try another question:</span>
+                )}
                 {message.chips.map((c, i) => (
                   <Chip key={c} text={c} onClick={() => onChip(c)} delay={i * 50} />
                 ))}
