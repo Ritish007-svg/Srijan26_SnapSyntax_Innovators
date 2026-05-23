@@ -73,13 +73,32 @@ export default function Chatbot() {
   const breadcrumb = activeCategory ?? "Home";
 
   const answerQuery = (query: string) => {
+    // 1. Smalltalk + common-sense intents
+    const smalltalk = handleSmalltalk(query);
+    if (smalltalk) return smalltalk;
+
+    const common = handleCommonSense(query);
+    if (common) return common;
+
+    // 2. FAQ search
     const results = searchFaq(query, { category: activeCategory ?? undefined, topK: 3 });
     if (results.length === 0 || results[0].s < 2) {
-      return {
-        content:
-          "I couldn't find a confident answer in the FAQ. Try rephrasing, or pick a topic from the sidebar. For anything outside the FAQ, please write to the Vicharanashala team.",
-        chips: suggestionsFor(activeCategory ?? undefined),
-      };
+      // try without category filter as a wider net
+      const wider = activeCategory ? searchFaq(query, { topK: 3 }) : results;
+      if (wider.length === 0 || wider[0].s < 2) {
+        return {
+          content:
+            "I couldn't find that in the FAQ. Try rephrasing, or pick a topic from the sidebar. For anything outside the FAQ, write to the Vicharanashala team.",
+          chips: suggestionsFor(activeCategory ?? undefined),
+          resolved: false as const,
+        };
+      }
+      const top = wider[0].item;
+      const followups = wider
+        .slice(1)
+        .map((r) => r.item.question)
+        .slice(0, 2);
+      return { content: top.answer, chips: followups, resolved: true as const };
     }
     const top = results[0].item;
     const followups = results
@@ -87,8 +106,8 @@ export default function Chatbot() {
       .map((r) => r.item.question)
       .concat(suggestionsFor(top.category, top.question))
       .filter((q, i, arr) => arr.indexOf(q) === i)
-      .slice(0, 3);
-    return { content: top.answer, chips: followups };
+      .slice(0, 2);
+    return { content: top.answer, chips: followups, resolved: true as const };
   };
 
   const send = (text: string) => {
@@ -104,17 +123,18 @@ export default function Chatbot() {
     setInput("");
     setIsTyping(true);
     setTimeout(() => {
-      const { content, chips } = answerQuery(trimmed);
+      const { content, chips, resolved } = answerQuery(trimmed);
       const botMsg: Message = {
         id: uid(),
         role: "bot",
         content,
         time: now(),
         chips,
+        askResolution: resolved,
       };
       setMessages((m) => [...m, botMsg]);
       setIsTyping(false);
-    }, 650);
+    }, 550);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -127,11 +147,7 @@ export default function Chatbot() {
   const onCategoryClick = (cat: string) => {
     setActiveCategory(cat);
     setSidebarOpen(false);
-    if (messages.length === 0) {
-      const q = getStarterQuestion(cat);
-      setInput(q);
-      inputRef.current?.focus();
-    }
+    inputRef.current?.focus();
   };
 
   const onStarterCard = (cat: string) => {
