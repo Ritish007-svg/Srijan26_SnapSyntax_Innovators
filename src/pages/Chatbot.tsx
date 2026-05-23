@@ -27,11 +27,17 @@ type Message = {
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "About the internship": Info,
   "Timing and dates": Calendar,
-  "NOC": FileCheck,
-  "Selection and offer letter": GraduationCap,
+  "NOC (No Objection Certificate)": FileCheck,
+  "Selection, offer letter, and certificate": GraduationCap,
+  "Work, mentorship, and projects": Sparkles,
+  "Code of conduct — communication channels": Info,
+  "Interviews Related": HelpCircle,
   "Certificate": Award,
-  "Rosetta Journal": BookOpen,
-  "Teams": Users,
+  "Rosetta — your internship journal": BookOpen,
+  "Phase 1 — coursework, Vibe LMS, and live sessions": GraduationCap,
+  "Yaksha Chat Related": HelpCircle,
+  "ViBe Platform": Sparkles,
+  "Team Formation": Users,
 };
 
 const iconFor = (cat: string) => categoryIcons[cat] ?? HelpCircle;
