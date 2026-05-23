@@ -22,7 +22,130 @@ type Message = {
   content: string;
   time: string;
   chips?: string[];
+  askResolution?: boolean;
 };
+
+type Reply = { content: string; chips?: string[]; resolved?: boolean };
+
+// ---------- Smalltalk: greetings, thanks, yes/no, goodbyes ----------
+function handleSmalltalk(raw: string): Reply | null {
+  const q = raw.toLowerCase().trim().replace(/[!.?]+$/g, "");
+
+  const greetings = ["hi", "hii", "hiii", "hello", "hey", "heyy", "yo", "namaste", "hola", "good morning", "good afternoon", "good evening"];
+  if (greetings.includes(q) || /^(hi|hello|hey)\b/.test(q)) {
+    return {
+      content: "Hi there! 👋 I'm the VINS Assistant. Ask me anything about the internship — timelines, NOC, certificates, Rosetta, or anything else.",
+      chips: ["What is VINS?", "When can I start?", "Do I need an NOC?"],
+    };
+  }
+
+  const thanks = ["thanks", "thank you", "thanku", "thnx", "ty", "thx", "thank u", "much appreciated"];
+  if (thanks.some((t) => q.includes(t))) {
+    return {
+      content: "You're welcome! 🌿 If anything else is unclear, just ask.",
+      chips: ["Show me all topics", "When will I get the certificate?"],
+    };
+  }
+
+  const okWords = ["ok", "okay", "k", "kk", "okie", "got it", "cool", "alright", "sure", "fine", "great", "nice", "awesome", "perfect", "understood", "noted", "hmm", "hmmm"];
+  if (okWords.includes(q)) {
+    return {
+      content: "Got it 👍 Let me know if you have another question, or pick a topic from the sidebar.",
+    };
+  }
+
+  if (/^(yes|yeah|yep|yup|ya|haan|y)$/.test(q) || q.includes("resolved") || q.includes("that helped") || q.includes("clear now")) {
+    return {
+      content: "Glad that helped! 🌱 Ask another question whenever you're ready, or close the chat — your call.",
+      chips: ["When will I get the certificate?", "What is Rosetta?"],
+    };
+  }
+
+  if (/^(no|nope|nah|not really|n)$/.test(q) || q.includes("not resolved") || q.includes("still confused") || q.includes("didn't help")) {
+    return {
+      content: "No worries — try rephrasing in your own words, or pick a related topic from the sidebar. If it's something specific to your case, drop a note to the Vicharanashala team.",
+      chips: suggestionsFor(),
+    };
+  }
+
+  const byes = ["bye", "goodbye", "see you", "cya", "later"];
+  if (byes.some((b) => q === b || q.startsWith(b))) {
+    return {
+      content: "See you! 👋 All the best with VINS.",
+    };
+  }
+
+  if (/^(who are you|what are you|what can you do|help)$/.test(q)) {
+    return {
+      content: "I'm the VINS Assistant — a helper for the Vicharanashala Internship FAQ. Ask me about start dates, NOC, the certificate, Rosetta, mentorship, or anything else listed in the sidebar.",
+      chips: ["What is VINS?", "Show me all topics"],
+    };
+  }
+
+  return null;
+}
+
+// ---------- Common-sense answers for predictable questions ----------
+function handleCommonSense(raw: string): Reply | null {
+  const q = raw.toLowerCase();
+
+  // Meeting / call / zoom link
+  if (
+    (q.includes("meeting") || q.includes("zoom") || q.includes("google meet") || q.includes("call") || q.includes("interview link")) &&
+    (q.includes("link") || q.includes("join") || q.includes("where") || q.includes("how"))
+  ) {
+    return {
+      content:
+        "Meeting links are shared over email by the Vicharanashala team — usually a short while before the scheduled time. Please check the inbox (and spam folder) of the email you applied with. If you still don't see it close to the meeting, reply to the most recent mail from the team.",
+      chips: ["When will the interview happen?", "Whom should I contact?"],
+      resolved: true,
+    };
+  }
+
+  // Contact / email / reach out
+  if (
+    q.includes("contact") || q.includes("email id") || q.includes("reach out") || q.includes("whom to") || q.includes("whom should i") ||
+    q.includes("how to contact") || q.includes("how do i contact") || q.includes("get in touch")
+  ) {
+    return {
+      content:
+        "For anything not covered here, write to the Vicharanashala team using the email thread you already have with them (e.g. your application/offer mail). They reply on email and through the official Yaksha chat — please avoid unofficial channels.",
+      chips: ["What is Yaksha Chat?", "Show me all topics"],
+      resolved: true,
+    };
+  }
+
+  // Reply time / response time
+  if ((q.includes("reply") || q.includes("respond") || q.includes("response")) && (q.includes("time") || q.includes("how long") || q.includes("when"))) {
+    return {
+      content:
+        "The team typically responds within 1–2 working days. If something is urgent (e.g. interview today), reply on the latest email thread with a clear subject line so it gets surfaced quickly.",
+      resolved: true,
+    };
+  }
+
+  // Where is the application / form / portal
+  if ((q.includes("apply") || q.includes("application") || q.includes("form")) && (q.includes("how") || q.includes("where") || q.includes("link"))) {
+    return {
+      content:
+        "Application happens through the official Vicharanashala portal/form shared on their website and email. If you've already received a result email, the next steps (offer letter, NOC, onboarding) will all come through that same mail thread.",
+      chips: ["What happens after selection?", "Do I need an NOC?"],
+      resolved: true,
+    };
+  }
+
+  // Generic time-of-day / date intent (today, tomorrow) without specific topic
+  if (/^(today|tomorrow|now|tonight)\??$/.test(q.trim())) {
+    return {
+      content:
+        "Could you give me a bit more context? For example: 'meeting today', 'interview tomorrow', 'start tomorrow'. That way I can point you to the right answer.",
+    };
+  }
+
+  return null;
+}
+
+
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "About the internship": Info,
