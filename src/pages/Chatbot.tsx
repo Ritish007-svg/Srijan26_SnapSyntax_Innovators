@@ -14,7 +14,9 @@ import {
   GraduationCap,
   HelpCircle,
 } from "lucide-react";
-import { categories, searchFaq, suggestionsFor, getStarterQuestion, getCategoryItems, getTopCategoryItems } from "@/lib/faqSearch";
+import { searchFaq, suggestionsFor } from "@/lib/faqSearch";
+import { HIERARCHY, getSubcategoryItems } from "@/lib/faqHierarchy";
+import { ChevronDown } from "lucide-react";
 
 type Message = {
   id: string;
@@ -179,6 +181,7 @@ const WELCOME_CHIPS = [
 
 export default function Chatbot() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [expandedMain, setExpandedMain] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -267,13 +270,25 @@ export default function Chatbot() {
     }
   };
 
-  const onCategoryClick = (cat: string) => {
-    setActiveCategory(cat);
+  const onSubcategoryClick = (main: string, sub: string) => {
+    setActiveCategory(`${main} › ${sub}`);
     setSidebarOpen(false);
-    const all = getCategoryItems(cat);
-    const items = getTopCategoryItems(cat, 5);
-    const total = all.length;
-    const intro = `**${cat}** — ${total} question${total > 1 ? "s" : ""} total. Tap one below or type your own.`;
+    const items = getSubcategoryItems(main, sub);
+    if (items.length === 0) {
+      const botMsg: Message = {
+        id: uid(),
+        role: "bot",
+        content: `**${sub}** — no FAQ entries yet for this topic. Try asking your question in the box below, or pick another subcategory.`,
+        time: now(),
+        askResolution: false,
+      };
+      setMessages((m) => [...m, botMsg]);
+      return;
+    }
+    const detail = items
+      .map((it, i) => `${i + 1}. ${it.question}\n   → ${it.answer.split("\n")[0]}`)
+      .join("\n\n");
+    const intro = `**${main} › ${sub}** — ${items.length} item${items.length > 1 ? "s" : ""}.\n\n${detail}\n\nTap any question below for the full answer, or type your own.`;
     const botMsg: Message = {
       id: uid(),
       role: "bot",
@@ -285,8 +300,9 @@ export default function Chatbot() {
     setMessages((m) => [...m, botMsg]);
   };
 
-  const onStarterCard = (cat: string) => {
-    onCategoryClick(cat);
+  const onStarterCard = (main: string) => {
+    setExpandedMain(main);
+    setSidebarOpen(true);
   };
 
   return (
@@ -337,22 +353,43 @@ export default function Chatbot() {
             <Sparkles className="w-4 h-4 shrink-0" />
             All topics
           </button>
-          {categories.map((cat) => {
-            const Icon = iconFor(cat);
-            const isActive = activeCategory === cat;
+          {HIERARCHY.map((main) => {
+            const isOpen = expandedMain === main.name;
             return (
-              <button
-                key={cat}
-                onClick={() => onCategoryClick(cat)}
-                className={`w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors border-l-[3px] ${
-                  isActive
-                    ? "bg-teal-50 border-primary text-accent-teal"
-                    : "border-transparent text-foreground hover:bg-white"
-                }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="truncate">{cat}</span>
-              </button>
+              <div key={main.name} className="space-y-1">
+                <button
+                  onClick={() => setExpandedMain(isOpen ? null : main.name)}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors border-l-[3px] ${
+                    isOpen
+                      ? "bg-teal-50 border-primary text-accent-teal"
+                      : "border-transparent text-foreground hover:bg-white"
+                  }`}
+                >
+                  <span className="text-base shrink-0">{main.emoji}</span>
+                  <span className="truncate flex-1">{main.name}</span>
+                  <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isOpen && (
+                  <div className="ml-3 pl-3 border-l border-divider space-y-0.5 animate-message-in">
+                    {main.subs.map((sub) => {
+                      const isActive = activeCategory === `${main.name} › ${sub.name}`;
+                      return (
+                        <button
+                          key={sub.name}
+                          onClick={() => onSubcategoryClick(main.name, sub.name)}
+                          className={`w-full text-left px-3 py-1.5 rounded-md text-[12.5px] transition-colors ${
+                            isActive
+                              ? "bg-teal-50 text-accent-teal font-medium"
+                              : "text-muted-foreground hover:bg-white hover:text-foreground"
+                          }`}
+                        >
+                          {sub.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
@@ -565,20 +602,18 @@ function WelcomeState({
         certificates, Rosetta, and more.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-3">
-        {categories.map((cat) => {
-          const Icon = iconFor(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => onStarter(cat)}
-              className="group bg-white border border-divider rounded-xl p-4 text-left hover:border-primary hover:shadow-sm transition-all"
-            >
-              <Icon className="w-5 h-5 text-primary mb-2" />
-              <div className="text-[13px] font-medium">{cat}</div>
-            </button>
-          );
-        })}
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {HIERARCHY.map((main) => (
+          <button
+            key={main.name}
+            onClick={() => onStarter(main.name)}
+            className="group bg-white border border-divider rounded-xl p-4 text-left hover:border-primary hover:shadow-sm transition-all"
+          >
+            <div className="text-xl mb-2">{main.emoji}</div>
+            <div className="text-[13px] font-medium leading-snug">{main.name}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">{main.subs.length} subtopics</div>
+          </button>
+        ))}
       </div>
 
       <div className="mt-8">
