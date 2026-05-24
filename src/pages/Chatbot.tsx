@@ -602,20 +602,18 @@ function WelcomeState({
         certificates, Rosetta, and more.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-3">
-        {categories.map((cat) => {
-          const Icon = iconFor(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => onStarter(cat)}
-              className="group bg-white border border-divider rounded-xl p-4 text-left hover:border-primary hover:shadow-sm transition-all"
-            >
-              <Icon className="w-5 h-5 text-primary mb-2" />
-              <div className="text-[13px] font-medium">{cat}</div>
-            </button>
-          );
-        })}
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {HIERARCHY.map((main) => (
+          <button
+            key={main.name}
+            onClick={() => onStarter(main.name)}
+            className="group bg-white border border-divider rounded-xl p-4 text-left hover:border-primary hover:shadow-sm transition-all"
+          >
+            <div className="text-xl mb-2">{main.emoji}</div>
+            <div className="text-[13px] font-medium leading-snug">{main.name}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">{main.subs.length} subtopics</div>
+          </button>
+        ))}
       </div>
 
       <div className="mt-8">
