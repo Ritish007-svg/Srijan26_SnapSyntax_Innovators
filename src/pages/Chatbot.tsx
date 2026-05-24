@@ -270,7 +270,18 @@ export default function Chatbot() {
   const onCategoryClick = (cat: string) => {
     setActiveCategory(cat);
     setSidebarOpen(false);
-    inputRef.current?.focus();
+    const items = getCategoryItems(cat);
+    const bullets = items.map((it, i) => `${i + 1}. ${it.question}`).join("\n");
+    const intro = `Here's everything under **${cat}**. Tap any point below to see a concise answer — or ask your own question in the box.`;
+    const botMsg: Message = {
+      id: uid(),
+      role: "bot",
+      content: `${intro}\n\n${bullets}`,
+      time: now(),
+      chips: items.map((it) => it.question),
+      askResolution: false,
+    };
+    setMessages((m) => [...m, botMsg]);
   };
 
   const onStarterCard = (cat: string) => {
