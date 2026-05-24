@@ -285,9 +285,7 @@ export default function Chatbot() {
   };
 
   const onStarterCard = (cat: string) => {
-    setActiveCategory(cat);
-    const q = getStarterQuestion(cat);
-    send(q);
+    onCategoryClick(cat);
   };
 
   return (
