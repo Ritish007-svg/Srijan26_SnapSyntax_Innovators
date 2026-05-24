@@ -181,6 +181,7 @@ const WELCOME_CHIPS = [
 
 export default function Chatbot() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [expandedMain, setExpandedMain] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
