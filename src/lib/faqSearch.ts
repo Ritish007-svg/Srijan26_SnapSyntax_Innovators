@@ -56,6 +56,10 @@ export function getCategoryItems(category: string): FaqItem[] {
   return allItems.filter((i) => i.category === category);
 }
 
+export function getTopCategoryItems(category: string, limit = 5): FaqItem[] {
+  return getCategoryItems(category).slice(0, limit);
+}
+
 export function getStarterQuestion(category: string): string {
   const items = getCategoryItems(category);
   return items[0]?.question ?? `Tell me about ${category}`;

@@ -14,7 +14,7 @@ import {
   GraduationCap,
   HelpCircle,
 } from "lucide-react";
-import { categories, searchFaq, suggestionsFor, getStarterQuestion, getCategoryItems } from "@/lib/faqSearch";
+import { categories, searchFaq, suggestionsFor, getStarterQuestion, getCategoryItems, getTopCategoryItems } from "@/lib/faqSearch";
 
 type Message = {
   id: string;
@@ -270,13 +270,14 @@ export default function Chatbot() {
   const onCategoryClick = (cat: string) => {
     setActiveCategory(cat);
     setSidebarOpen(false);
-    const items = getCategoryItems(cat);
-    const bullets = items.map((it, i) => `${i + 1}. ${it.question}`).join("\n");
-    const intro = `Here's everything under **${cat}**. Tap any point below to see a concise answer — or ask your own question in the box.`;
+    const all = getCategoryItems(cat);
+    const items = getTopCategoryItems(cat, 5);
+    const total = all.length;
+    const intro = `**${cat}** — ${total} question${total > 1 ? "s" : ""} total. Tap one below or type your own.`;
     const botMsg: Message = {
       id: uid(),
       role: "bot",
-      content: `${intro}\n\n${bullets}`,
+      content: intro,
       time: now(),
       chips: items.map((it) => it.question),
       askResolution: false,
