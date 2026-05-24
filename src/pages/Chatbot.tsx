@@ -14,7 +14,7 @@ import {
   GraduationCap,
   HelpCircle,
 } from "lucide-react";
-import { categories, searchFaq, suggestionsFor, getStarterQuestion } from "@/lib/faqSearch";
+import { categories, searchFaq, suggestionsFor, getStarterQuestion, getCategoryItems } from "@/lib/faqSearch";
 
 type Message = {
   id: string;
