@@ -353,22 +353,43 @@ export default function Chatbot() {
             <Sparkles className="w-4 h-4 shrink-0" />
             All topics
           </button>
-          {categories.map((cat) => {
-            const Icon = iconFor(cat);
-            const isActive = activeCategory === cat;
+          {HIERARCHY.map((main) => {
+            const isOpen = expandedMain === main.name;
             return (
-              <button
-                key={cat}
-                onClick={() => onCategoryClick(cat)}
-                className={`w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors border-l-[3px] ${
-                  isActive
-                    ? "bg-teal-50 border-primary text-accent-teal"
-                    : "border-transparent text-foreground hover:bg-white"
-                }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="truncate">{cat}</span>
-              </button>
+              <div key={main.name} className="space-y-1">
+                <button
+                  onClick={() => setExpandedMain(isOpen ? null : main.name)}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors border-l-[3px] ${
+                    isOpen
+                      ? "bg-teal-50 border-primary text-accent-teal"
+                      : "border-transparent text-foreground hover:bg-white"
+                  }`}
+                >
+                  <span className="text-base shrink-0">{main.emoji}</span>
+                  <span className="truncate flex-1">{main.name}</span>
+                  <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isOpen && (
+                  <div className="ml-3 pl-3 border-l border-divider space-y-0.5 animate-message-in">
+                    {main.subs.map((sub) => {
+                      const isActive = activeCategory === `${main.name} › ${sub.name}`;
+                      return (
+                        <button
+                          key={sub.name}
+                          onClick={() => onSubcategoryClick(main.name, sub.name)}
+                          className={`w-full text-left px-3 py-1.5 rounded-md text-[12.5px] transition-colors ${
+                            isActive
+                              ? "bg-teal-50 text-accent-teal font-medium"
+                              : "text-muted-foreground hover:bg-white hover:text-foreground"
+                          }`}
+                        >
+                          {sub.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
