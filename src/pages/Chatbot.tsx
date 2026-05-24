@@ -269,13 +269,25 @@ export default function Chatbot() {
     }
   };
 
-  const onCategoryClick = (cat: string) => {
-    setActiveCategory(cat);
+  const onSubcategoryClick = (main: string, sub: string) => {
+    setActiveCategory(`${main} › ${sub}`);
     setSidebarOpen(false);
-    const all = getCategoryItems(cat);
-    const items = getTopCategoryItems(cat, 5);
-    const total = all.length;
-    const intro = `**${cat}** — ${total} question${total > 1 ? "s" : ""} total. Tap one below or type your own.`;
+    const items = getSubcategoryItems(main, sub);
+    if (items.length === 0) {
+      const botMsg: Message = {
+        id: uid(),
+        role: "bot",
+        content: `**${sub}** — no FAQ entries yet for this topic. Try asking your question in the box below, or pick another subcategory.`,
+        time: now(),
+        askResolution: false,
+      };
+      setMessages((m) => [...m, botMsg]);
+      return;
+    }
+    const detail = items
+      .map((it, i) => `${i + 1}. ${it.question}\n   → ${it.answer.split("\n")[0]}`)
+      .join("\n\n");
+    const intro = `**${main} › ${sub}** — ${items.length} item${items.length > 1 ? "s" : ""}.\n\n${detail}\n\nTap any question below for the full answer, or type your own.`;
     const botMsg: Message = {
       id: uid(),
       role: "bot",
@@ -287,8 +299,9 @@ export default function Chatbot() {
     setMessages((m) => [...m, botMsg]);
   };
 
-  const onStarterCard = (cat: string) => {
-    onCategoryClick(cat);
+  const onStarterCard = (main: string) => {
+    setExpandedMain(main);
+    setSidebarOpen(true);
   };
 
   return (
